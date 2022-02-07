@@ -6,7 +6,7 @@
     "build": "node contract/compile.js",
     "build:debug": "node contract/compile.js --debug",
     "dev:deploy": "npm run build && near dev-deploy && env-cmd -f ./neardev/dev-account.env node scripts/init.js",  
-    "deploy": "./deploy-staging.sh"
+    "deploy": "./scripts/deploy.testnet.sh"
   },
   "dependencies": {
     "near-api-js": "^0.44.2",
