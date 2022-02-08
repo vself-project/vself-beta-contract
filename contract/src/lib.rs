@@ -51,6 +51,7 @@ pub struct EventStats {
     finish_time: Option<u64>,
     total_rewards: u64,
     total_users: u64,
+    total_actions: u64,
 }
 
 #[derive(Clone)]
@@ -165,6 +166,7 @@ impl Contract {
             finish_time: None,
             total_rewards: 0,
             total_users: 0,
+            total_actions: 0,
         })
     }
 
@@ -187,91 +189,72 @@ impl Contract {
     }
 
     #[payable]
-    pub fn checkin(&mut self, username: String, request: String) -> usize {
+    pub fn checkin(&mut self, username: String, request: String) -> Option<usize> {
         // Assert event is active
-        assert!( self.event.is_some() );        
+        assert!( self.event.is_some(), "No event is running" );
+        let timestamp: u64 = env::block_timestamp();        
 
-        let timestamp: u64 = env::block_timestamp();
-        let qr_string = request.clone();
-        
+        // Check if account seems valid
+        assert!( AccountId::try_from(username.clone()).is_ok(), "Valid account is required" );
+        let user_account_id = AccountId::try_from(username.clone()).unwrap();
+                        
         // Match QR code to quest
+        let qr_string = request.clone();
         let quests = self.event.as_ref().unwrap().quests.clone();        
         let mut reward_index = 0;
         for quest in &quests {            
             if request.starts_with(&quest.qr_prefix) { break };
             reward_index = reward_index + 1;
         }
-
-        let quest = quests.get(reward_index).unwrap();
+        
         let action_data = ActionData {
             username: username.clone(),
             qr_string: qr_string.clone(),
             reward_index,
             timestamp,
-        };
+        };        
 
-        // Register checkin data
+        // Register checkin data        
+        let mut stats = self.stats.as_ref().unwrap().clone();
+
+        // Check if we have a new user
+        if stats.participants.insert(user_account_id.clone()) {
+            stats.total_users += 1;
+            self.balances.insert(&user_account_id, &UserBalance {
+                karma_balance: 0,
+                quests_status: vec![false, false],
+            });
+        }
+
+        // Register action        
         self.last_action_index += 1;
         self.actions.push(&action_data);
-        // TO DO
-        // if let Some(stats) = self.stats {
-        //     if stats.users.insert(username);
-        //     self.stats = EventStats {
-        //         users: 
-        //         total_rewards
-        //     }           
-        // }
-        log!("Checkin successful! User: {}, Quest: {}", username, reward_index.clone());                
+        stats.total_actions += 1;
 
-        // Check if account seems valid
-        if !AccountId::try_from(username.clone()).is_ok() {
-            return reward_index;
-        }
-        let token_id_with_timestamp: String = format!("{}:{}:{}", reward_index.clone(), timestamp); 
-        let contract_id = env::current_account_id();        
-        let root_id = AccountId::try_from(contract_id).unwrap();
-        
-        // Decide what to transfer for the player                                                                
-        let media_url: String = format!("{}", quest.reward_url);
-        let media_hash = Base64VecU8(env::sha256(media_url.as_bytes()));
-        
-        let mut token_metadata = TokenMetadata {
-            title: Some(quest.reward_title.clone()),
-            description: Some(quest.reward_description.clone()),
-            media: Some(media_url),
-            media_hash: Some(media_hash),
-            copies: Some(1u64),
-            issued_at: Some(timestamp.to_string()),
-            expires_at: None,
-            starts_at: None,
-            updated_at: None,
-            extra: Some(qr_string.clone()),
-            reference: None,
-            reference_hash: None,
-        };
+        // Check if we've been awarded a reward
+        if let Some(quest) = quests.get(reward_index) {  
+            // Update state if we are lucky          
+            stats.total_rewards += 1;          
+            self.stats = Some(stats);
 
-        // Mint achievement reward                
-        self.nft_mint(token_id_with_timestamp.clone(), root_id.clone(), token_metadata.clone());
-        log!("Success! Minting NFT for {}! TokenID = {}", root_id.clone(), token_id_with_timestamp.clone());
-        
-        // Transfer NFT to new owner
-        let receiver_id = AccountId::try_from(username).unwrap();                
-        env::promise_create(
-            root_id.clone(),
-            "nft_transfer",
-            json!({
-                "token_id": token_id_with_timestamp,
-                "receiver_id": receiver_id,
-            })
-            .to_string()
-            .as_bytes(),
-            ONE_YOCTO,
-            SINGLE_CALL_GAS,
-        );
-        log!("Success! Transfering NFT for {} from {}", receiver_id.clone(), root_id.clone());
-        
-        return reward_index;
-    }    
+            // Update user balance
+            let mut balance = self.balances.get(&user_account_id).expect("ERR_NOT_REGISTERED");
+            balance.quests_status[reward_index] = true;
+            self.balances.insert(&user_account_id, &balance);
+            
+            /// NFT Part (issue token)
+            self.issue_nft_reward(user_account_id.clone(), reward_index.clone());  
+
+            log!("Checkin successful! User: {}, Quest: {}", username, reward_index.clone());
+            return Some(reward_index);
+        } else {
+            // Update state if we are not
+            self.stats = Some(stats);       
+
+            log!("No reward for this checkin! User: {}", username);
+            return None;            
+        }                        
+    }
 }
 
 // Tests TO DO

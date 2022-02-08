@@ -30,9 +30,9 @@ impl Contract {
     }
 
     /// Return user balance
-    // pub fn get_user_rewards_balance() -> Vec<bool> {
-
-    // }
+    pub fn get_user_balance(&self, account_id: AccountId) -> Option<UserBalance> {
+        self.balances.get(&account_id)
+    }
 
     // Get all user actions for current event
     /// - `from_index` is the index to start from.

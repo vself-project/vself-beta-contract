@@ -24,7 +24,10 @@ sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "requ
 sh.exec(`near view ${contractName} get_event_stats`);
 sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
 sh.exec(`near view ${contractName} get_event_stats`);
-sh.exec(`near view ${contractName} get_user_balance '{"username": "ilerik.testnet"}'`);
+sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near view ${contractName} get_event_stats`);
+sh.exec(`near view ${contractName} get_user_balance '{"account_id": "ilerik.testnet"}'`);
+sh.exec(`near view ${contractName} get_user_balance '{"account_id": "sergantche.testnet"}'`);
 
 console.log("Finishing event...");
 sh.exec(`near call ${contractName} stop_event --accountId ${contractName}`);
