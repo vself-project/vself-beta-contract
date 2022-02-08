@@ -1,9 +1,9 @@
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
   };
+use near_contract_standards::non_fungible_token::{Token, TokenId, NonFungibleToken};
 use near_sdk::json_types::Base64VecU8;
 use near_sdk::serde_json::json;
-use near_contract_standards::non_fungible_token::{Token, TokenId, NonFungibleToken};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{
@@ -14,6 +14,7 @@ use std::collections::HashSet;
 
 mod constants;
 pub mod views;
+pub mod nft;
 
 use near_sdk::ONE_YOCTO;
 use constants::SINGLE_CALL_GAS;
@@ -194,7 +195,7 @@ impl Contract {
         let qr_string = request.clone();
         
         // Match QR code to quest
-        let quests = self.event.as_ref().unwrap().quests.clone();
+        let quests = self.event.as_ref().unwrap().quests.clone();        
         let mut reward_index = 0;
         for quest in &quests {            
             if request.starts_with(&quest.qr_prefix) { break };
@@ -208,18 +209,26 @@ impl Contract {
             reward_index,
             timestamp,
         };
+
         // Register checkin data
         self.last_action_index += 1;
         self.actions.push(&action_data);
-
-        let token_id_with_timestamp: String = format!("{}:{}", reward_index.clone(), timestamp); 
-        log!("Checkin successful! User: {}, Quest: {}", username, reward_index.clone());
+        // TO DO
+        // if let Some(stats) = self.stats {
+        //     if stats.users.insert(username);
+        //     self.stats = EventStats {
+        //         users: 
+        //         total_rewards
+        //     }           
+        // }
+        log!("Checkin successful! User: {}, Quest: {}", username, reward_index.clone());                
 
         // Check if account seems valid
         if !AccountId::try_from(username.clone()).is_ok() {
             return reward_index;
         }
-        let contract_id = env::current_account_id();
+        let token_id_with_timestamp: String = format!("{}:{}:{}", reward_index.clone(), timestamp); 
+        let contract_id = env::current_account_id();        
         let root_id = AccountId::try_from(contract_id).unwrap();
         
         // Decide what to transfer for the player                                                                
@@ -263,39 +272,6 @@ impl Contract {
         
         return reward_index;
     }    
-}
-
-// Implement NFT standart
-near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
-near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
-near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
-
-#[near_bindgen]
-impl Contract {
-    /// Mint a new token with ID=`token_id` belonging to `receiver_id`.
-    ///
-    /// Since this example implements metadata, it also requires per-token metadata to be provided
-    /// in this call. `self.tokens.mint` will also require it to be Some, since
-    /// `StorageKey::TokenMetadata` was provided at initialization.
-    ///
-    /// `self.tokens.mint` will enforce `predecessor_account_id` to equal the `owner_id` given in
-    /// initialization call to `new`.
-    #[payable]
-    pub fn nft_mint(
-        &mut self,
-        token_id: TokenId,
-        receiver_id: AccountId,
-        token_metadata: TokenMetadata,
-    ) -> Token {
-        self.tokens.internal_mint(token_id, receiver_id, Some(token_metadata))
-    }
-}
-
-#[near_bindgen]
-impl NonFungibleTokenMetadataProvider for Contract {
-  fn nft_metadata(&self) -> NFTContractMetadata {
-      self.metadata.get().unwrap()
-  }
 }
 
 // Tests TO DO
