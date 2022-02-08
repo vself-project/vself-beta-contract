@@ -1,6 +1,8 @@
-use crate::EventData;
-use crate::QuestData;
+use near_sdk::Gas;
+use crate::*;
 
+// Prepaid gas for making a single simple call.
+pub const SINGLE_CALL_GAS: Gas = Gas(200000000000000);
 pub const BASE_URI: &str = "https://vself-dev.web.app"; // TO DO IPFS
 
 pub fn mock_event_data() -> EventData {

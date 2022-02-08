@@ -1,5 +1,3 @@
-mod constants;
-
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
   };
@@ -11,17 +9,18 @@ use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{
     env, log, near_bindgen, Gas, Balance, PanicOnDefault, AccountId, BorshStorageKey, Promise, PromiseResult, PromiseOrValue
 };
-use near_sdk::collections::{ LazyOption, Vector };
+use near_sdk::collections::{ LookupMap, LazyOption, Vector };
 use std::collections::HashSet;
 
-// Prepaid gas for making a single simple call.
-const SINGLE_CALL_GAS: Gas = Gas(200000000000000);
-const ONE_YOCTO: Balance = 1;
+mod constants;
+pub mod views;
 
-#[derive(Serialize)]
+use near_sdk::ONE_YOCTO;
+use constants::SINGLE_CALL_GAS;
+
 #[derive(Clone)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-#[derive(BorshDeserialize, BorshSerialize)]
 pub struct QuestData {
     pub qr_prefix: String,    
     pub reward_title: String,
@@ -30,9 +29,9 @@ pub struct QuestData {
 }
 
 // Current event data
-#[derive(Serialize)]
+#[derive(Clone)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-#[derive(BorshDeserialize, BorshSerialize)]
 pub struct EventData {                
     event_name: String,
     event_description: String,
@@ -42,20 +41,20 @@ pub struct EventData {
 }
 
 // Current event data
-#[derive(Serialize)]
+#[derive(Clone)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-#[derive(BorshDeserialize, BorshSerialize)]
-pub struct EventStats {            
-    users: HashSet<AccountId>, // Participants    
+pub struct EventStats {               
+    participants: HashSet<AccountId>, // Participants of current event
     start_time: u64,
     finish_time: Option<u64>,
     total_rewards: u64,
     total_users: u64,
 }
 
-#[derive(Serialize)]
+#[derive(Clone)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-#[derive(BorshDeserialize, BorshSerialize)]
 pub struct ActionData {
     timestamp: u64,
     username: String,
@@ -63,29 +62,42 @@ pub struct ActionData {
     reward_index: usize,    
 }
 
+/// This is format of output via JSON for the user balance.
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct UserBalance {
+    pub karma_balance: u64,
+    pub quests_status: Vec<bool>,
+}
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Contract {
     owner_id: AccountId, // Owner ID
     event_id: u64, // Current event count
-    event: Option<EventData>, // Event metadata
-    stats: Option<EventStats>, // Event stats 
+    event: Option<EventData>, // Current event metadata
+    stats: Option<EventStats>, // Event stats aggregated for current event
 
     // NFT implementation
     tokens: NonFungibleToken,
     metadata: LazyOption<NFTContractMetadata>,
 
-    // Event statistics and history
+    // Event statistics and history   
+    last_action_index: u64, // Last action index
     actions_from: u64, // Current event actions start from that index
     actions: Vector<ActionData>, // History of all user actions
+    
+    /// Balance sheet for each user
+    balances: LookupMap<AccountId, UserBalance>,
 
-    // Past events
+    /// Past events archive
     past_events: Vector<(EventData, EventStats)>,
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     Actions,
+    Balances,
     PastEvents,
     NonFungibleToken,
     Metadata,
@@ -123,8 +135,10 @@ impl Contract {
             event_id: 0,
             event: None,
             stats: None,
+            last_action_index: 0,
             actions_from: 0,
             actions: Vector::new(StorageKey::Actions),
+            balances: LookupMap::new(StorageKey::Balances),
             past_events: Vector::new(StorageKey::PastEvents),
             tokens: NonFungibleToken::new(
                 StorageKey::NonFungibleToken,
@@ -137,29 +151,46 @@ impl Contract {
         }                
     }
     
-    // Helper for randomness
-    fn toss(&self) -> u8 {        
-        // Toss the dice (minimal logic for now)
-        let rand: u8 = *env::random_seed().get(0).unwrap();        
-        return rand;
-    }
-    
     // Initiate next event
     pub fn start_event(&mut self) {
+        assert!( self.event.is_none() );
+        let timestamp: u64 = env::block_timestamp();        
+
         let test_data = constants::mock_event_data();
         self.event = Some(test_data);
+        self.stats = Some(EventStats {
+            participants: HashSet::new(),
+            start_time: timestamp,
+            finish_time: None,
+            total_rewards: 0,
+            total_users: 0,
+        })
     }
 
     // Stop and put event to archive
-    pub fn stop_event(&mut self) {       
+    pub fn stop_event(&mut self) {
+        assert!( self.event.is_some() );
+        let timestamp: u64 = env::block_timestamp();        
+
+        let mut final_stats = self.stats.as_ref().unwrap().clone(); 
+        final_stats.finish_time = Some(timestamp);
+
+        let mut final_event_data = self.event.as_ref().unwrap().clone();
+
+        self.past_events.push(&(final_event_data, final_stats));
+        self.event_id += 1;
+        self.actions_from = self.last_action_index;
+
         self.event = None;
+        self.stats = None;
     }
 
     #[payable]
     pub fn checkin(&mut self, username: String, request: String) -> usize {
         // Assert event is active
-        assert!( !self.event.is_none() );        
-        let timestamp: u64 = env::block_timestamp();        
+        assert!( self.event.is_some() );        
+
+        let timestamp: u64 = env::block_timestamp();
         let qr_string = request.clone();
         
         // Match QR code to quest
@@ -178,6 +209,7 @@ impl Contract {
             timestamp,
         };
         // Register checkin data
+        self.last_action_index += 1;
         self.actions.push(&action_data);
 
         let token_id_with_timestamp: String = format!("{}:{}", reward_index.clone(), timestamp); 
@@ -231,26 +263,6 @@ impl Contract {
         
         return reward_index;
     }    
-
-    /// Views
-
-    // Event general status
-    pub fn is_active(&self) -> bool {
-        match self.event {
-            Some(_) => true,
-            None => false
-        }
-    }
-
-    // Get all user actions for current event
-    /// - `from_index` is the index to start from.
-    /// - `limit` is the maximum number of elements to return.
-    pub fn get_event_actions(&self, from_index: u64, limit: u64) -> Vec<ActionData> {  
-        let from_index = self.actions_from + from_index; // Shift for current event
-        (from_index..std::cmp::min(from_index + limit, self.actions.len()))
-            .map(|index| self.actions.get(index).unwrap())
-            .collect()
-    }  
 }
 
 // Implement NFT standart

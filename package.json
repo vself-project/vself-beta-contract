@@ -5,17 +5,18 @@
   "scripts": {
     "build": "node contract/compile.js",
     "build:debug": "node contract/compile.js --debug",
-    "dev:deploy": "npm run build && near dev-deploy && env-cmd -f ./neardev/dev-account.env node scripts/init.js",  
+    "test": "env-cmd -f ./neardev/dev-account.env node scripts/test.js", 
+    "dev:deploy": "npm run build && rm -rf neardev && near dev-deploy && env-cmd -f ./neardev/dev-account.env node scripts/init.js",
     "deploy": "./scripts/deploy.testnet.sh"
   },
-  "dependencies": {
+  "dependencies": {    
     "near-api-js": "^0.44.2",
-    "near-cli": "^3.1.0",        
-    "shelljs": "^0.8.4",    
+    "near-cli": "^3.1.0",
+    "shelljs": "^0.8.4",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },
-  "devDependencies": {        
+  "devDependencies": {
     "env-cmd": "^10.1.0"
   }
 }
