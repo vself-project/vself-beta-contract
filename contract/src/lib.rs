@@ -86,7 +86,7 @@ pub struct Contract {
 
     // Event statistics and history   
     last_action_index: u64, // Last action index
-    actions_from: u64, // Current event actions start from that index
+    actions_from: Vector<u64>, // Event actions start from that index
     actions: Vector<ActionData>, // History of all user actions
     
     /// Balance sheet for each user
@@ -99,6 +99,7 @@ pub struct Contract {
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     Actions,
+    ActionsFrom,
     Balances,
     PastEvents,
     NonFungibleToken,
@@ -138,7 +139,7 @@ impl Contract {
             event: None,
             stats: None,
             last_action_index: 0,
-            actions_from: 0,
+            actions_from: Vector::new(StorageKey::ActionsFrom),
             actions: Vector::new(StorageKey::Actions),
             balances: LookupMap::new(StorageKey::Balances),
             past_events: Vector::new(StorageKey::PastEvents),
@@ -155,8 +156,10 @@ impl Contract {
     
     // Initiate next event
     pub fn start_event(&mut self) {
-        assert!( self.event.is_none() );
+        assert!( self.event.is_none() );        
         let timestamp: u64 = env::block_timestamp();        
+
+        self.actions_from.push(&self.last_action_index);
 
         let test_data = constants::mock_event_data();
         self.event = Some(test_data);
@@ -181,8 +184,7 @@ impl Contract {
         let mut final_event_data = self.event.as_ref().unwrap().clone();
 
         self.past_events.push(&(final_event_data, final_stats));
-        self.event_id += 1;
-        self.actions_from = self.last_action_index;
+        self.event_id += 1;        
 
         self.event = None;
         self.stats = None;

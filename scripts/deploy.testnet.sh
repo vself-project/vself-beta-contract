@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-ID=beta_v3.ilerik.testnet
+ID=beta_v4.ilerik.testnet
 
 # recreate account
-near delete $ID ilerik.testnet
+# near delete $ID ilerik.testnet
 near create-account $ID --masterAccount=ilerik.testnet --initial-balance 100
 
 # deploy contract

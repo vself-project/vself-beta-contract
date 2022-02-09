@@ -5,14 +5,21 @@
   "scripts": {
     "build": "node contract/compile.js",
     "build:debug": "node contract/compile.js --debug",
-    "test": "env-cmd -f ./neardev/dev-account.env node scripts/test.js", 
-    "dev:deploy": "npm run build && rm -rf neardev && near dev-deploy && env-cmd -f ./neardev/dev-account.env node scripts/init.js",
-    "deploy": "./scripts/deploy.testnet.sh"
+    "test": "env-cmd -f ./neardev/dev-account.env node contract/test.js",    
+    "dev:deploy": "npm run build && rm -rf neardev && near dev-deploy && env-cmd -f ./neardev/dev-account.env node contract/init.js",
+    "deploy": "./scripts/deploy.testnet.sh",
+    "test:testnet": "env-cmd -f ./config/testnet-account.env node contract/test.js",
+    "dev:server": "env-cmd -f ./neardev/dev-account.env node server.js",
+    "deploy:server": "gcloud builds submit --project vself-dev --tag gcr.io/vself-dev/vself-api-server",
+    "test:server": "./scripts/test.server.sh"
   },
-  "dependencies": {    
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.2",
     "near-api-js": "^0.44.2",
     "near-cli": "^3.1.0",
     "shelljs": "^0.8.4",
+    "socket.io": "^4.4.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },
