@@ -1,14 +1,12 @@
 use near_contract_standards::non_fungible_token::metadata::{
-    NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
+    NFTContractMetadata, NFT_METADATA_SPEC,
   };
-use near_contract_standards::non_fungible_token::{Token, TokenId, NonFungibleToken};
+use near_contract_standards::non_fungible_token::{NonFungibleToken};
 use near_sdk::json_types::Base64VecU8;
 use near_sdk::serde_json::json;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{
-    env, log, near_bindgen, Gas, Balance, PanicOnDefault, AccountId, BorshStorageKey, Promise, PromiseResult, PromiseOrValue
-};
+use near_sdk::{env, log, near_bindgen, PanicOnDefault, AccountId, BorshStorageKey};
 use near_sdk::collections::{ LookupMap, LazyOption, Vector };
 use std::collections::HashSet;
 
@@ -180,8 +178,7 @@ impl Contract {
 
         let mut final_stats = self.stats.as_ref().unwrap().clone(); 
         final_stats.finish_time = Some(timestamp);
-
-        let mut final_event_data = self.event.as_ref().unwrap().clone();
+        let final_event_data = self.event.as_ref().unwrap().clone();        
 
         self.past_events.push(&(final_event_data, final_stats));
         self.event_id += 1;        
@@ -234,7 +231,7 @@ impl Contract {
         stats.total_actions += 1;
 
         // Check if we've been awarded a reward
-        if let Some(quest) = quests.get(reward_index) {  
+        if let Some(_) = quests.get(reward_index) {  
             // Update state if we are lucky          
             stats.total_rewards += 1;          
             self.stats = Some(stats);
@@ -244,7 +241,7 @@ impl Contract {
             balance.quests_status[reward_index] = true;
             self.balances.insert(&user_account_id, &balance);
             
-            /// NFT Part (issue token)
+            // NFT Part (issue token)
             self.issue_nft_reward(user_account_id.clone(), reward_index.clone());  
 
             log!("Checkin successful! User: {}, Quest: {}", username, reward_index.clone());

@@ -1,9 +1,15 @@
 ## vSelf Beta Event Management Contract
 
+### Development
+
+1. 
+
 ### Deployment
 
 1. testnet => event.vself.testnet
 1. mainnet => TBD
+
+
 
 ### Event Lifecycle (User story)
 
@@ -26,7 +32,7 @@ Contract serves as a registry for NFT tokens and implements NEAR standarts.
 Change Methods:
 
 1. start_event()
-1. finish_event()
+1. stop_event()
 1. checkin()
 
 Read-only Methods:
@@ -34,6 +40,19 @@ Read-only Methods:
 1. get_event_data()
 1. get_event_actions()
 1. get_event_stats()
+
+### Availibility API server
+
+Deployed to google cloud, has contract level account credentials for now.
+
+HTTPS Endpoints:
+1. /status -> Num (number of quests) / 0 - for no event
+1. /rewards -> [ string ] (url of NFT images)
+1. /rewards?nearid=<account_id> -> {[Reward]}
+1. /checkin?nearid=<account_id>&qr=<string> -> 
+    OnSucces: -> Reward: { index, got, title, description }
+    OnFail  : -> -1
+
 
 ## Future plans
 

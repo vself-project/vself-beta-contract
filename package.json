@@ -9,9 +9,12 @@
     "dev:deploy": "npm run build && rm -rf neardev && near dev-deploy && env-cmd -f ./neardev/dev-account.env node contract/init.js",
     "deploy": "./scripts/deploy.testnet.sh",
     "test:testnet": "env-cmd -f ./config/testnet-account.env node contract/test.js",
+    "test:testnet:checkin": "env-cmd -f ./config/testnet-account.env node contract/test.checkins.js",
     "dev:server": "env-cmd -f ./neardev/dev-account.env node server.js",
+    "server": "env-cmd -f ./config/testnet-account.env node server.js",    
     "deploy:server": "gcloud builds submit --project vself-dev --tag gcr.io/vself-dev/vself-api-server",
-    "test:server": "./scripts/test.server.sh"
+    "test:server": "./scripts/test.server.sh",
+    "clean": "rm -rf ./creds/*"
   },
   "dependencies": {
     "cors": "^2.8.5",

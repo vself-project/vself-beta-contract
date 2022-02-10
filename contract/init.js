@@ -19,7 +19,10 @@ if (code === 0) {
 }
 
 // Try to send money to my main account
-sh.exec(`near send ${contractName} ilerik.testnet 100`);
+sh.exec(`near send ${contractName} meta_irony.testnet 100`);
+
+// Copy crededntials for later use
+sh.exec(`cp ~/.near-credentials/testnet/${contractName}.json ./creds`);
 
 // exit script with the same code as the build command
 process.exit(code)

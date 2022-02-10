@@ -1,9 +1,9 @@
 use near_contract_standards::non_fungible_token::metadata::{
-    NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
+    NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata,
   };
-use near_contract_standards::non_fungible_token::{Token, TokenId, NonFungibleToken};
+use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_sdk::{
-    env, log, near_bindgen, Gas, Balance, PanicOnDefault, AccountId, BorshStorageKey, Promise, PromiseResult, PromiseOrValue
+    env, log, near_bindgen, AccountId, Promise, PromiseOrValue
 };
 
 use crate::*;
@@ -40,7 +40,7 @@ impl Contract {
         let media_url: String = format!("{}", quest.reward_url);
         let media_hash = Base64VecU8(env::sha256(media_url.as_bytes()));
 
-        let mut token_metadata = TokenMetadata {
+        let token_metadata = TokenMetadata {
             title: Some(quest.reward_title.clone()),
             description: Some(quest.reward_description.clone()),
             media: Some(media_url),

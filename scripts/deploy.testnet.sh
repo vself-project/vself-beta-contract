@@ -11,3 +11,6 @@ near create-account $ID --masterAccount=ilerik.testnet --initial-balance 100
 near deploy --wasmFile out/main.wasm --accountId $ID
 near call $ID new --accountId $ID
 near view $ID is_active
+
+# copy credentials for later deploy
+cp ~/.near-credentials/testnet/$ID.json ./creds
