@@ -73,14 +73,7 @@ contractAccount.addAccessKey = (publicKey) =>
 
 const contract = new Contract(contractAccount, contractName, contractMethods);
 
-/// Logic
-
-// Rewards array
-const rewards = [
-  { qr: "common", title: "Common", description: "Common Description", url: "https://vself-dev.web.app/0.jpg"},
-  { qr: "uncommon", title: "Uncommon", description: "Uncommon Description", url:"https://vself-dev.web.app/1.jpg"},
-];
-
+// Logic API
 app.get("/version", async (req, res) => {
   let result = 'None';
   
@@ -95,7 +88,7 @@ app.get("/version", async (req, res) => {
 app.get("/status", async (req, res) => {
   let result;
 
-  // result = 2; // Number of rewards
+  // Number of rewards
   result = await contract.get_event_data().catch( (err) => {  
     res.status(500).send();
   })
@@ -103,23 +96,41 @@ app.get("/status", async (req, res) => {
   res.json(result);
 });
 
+// Balance of a single player or list of NFT rewards
 app.get("/rewards", async (req, res) => {    
   let result = 'None';
-  const username = req.query.nearid.slice(1, -1);
+  let nearid = req.query.nearid;  
 
-  result = [{
-    index: 0,
-    got: true,
-    url: rewards[0].url,
-    title: rewards[0].title,
-    description: rewards[0].description,
-  }]
+  if (nearid) { // If username is provided we need to return user balance
+    let account_id = nearid.slice(1, -1); // Extract account id
+    console.log("Account ID: ", account_id);
+    result = await contract.get_user_balance({ account_id }).catch( (err) => {  
+      console.log(err);
+      res.status(200).send();
+    }).then( balance_data => {
+      console.log("Balance: ", balance_data.quests_status);
+      result = balance_data.quests_status;
+    })
+  } else { // If it's a request and we need to return list of NFTs
+    result = await contract.get_event_data().catch( (err) => {  
+      console.log(err);
+      res.status(200).send();
+    }).then( event_data => {
+      console.log(event_data);
+    })
+    // result = [{
+    //   index: 0,
+    //   got: true,
+    //   url: rewards[0].url,
+    //   title: rewards[0].title,
+    //   description: rewards[0].description,
+    // }]
+  }
 
   res.json(result);
 });
 
-/// Checkin
-
+// Checkin
 app.get("/checkin", async (req, res) => {
   let result = 'None';
   console.log(req.query);
@@ -129,32 +140,11 @@ app.get("/checkin", async (req, res) => {
   
   console.log(request);
   
-  result = await contract.checkin({ username, request }, 300000000000000, minting_cost ).catch( (err) => {  
+  result = await contract.checkin({args: { username, request }, gas: 300000000000000, amount: minting_cost }).catch( (err) => {  
     console.log(err);
     res.status(200).send();
   })
   console.log(result);
-
-  result = result % 2;  
-  let reward = rewards[result];
-
-  res.json({
-    index: result,
-    got: false,
-    title: reward.title,
-    description: reward.description,    
-  });
-});
-
-app.get("/balance", async (req, res) => {
-  let result = 'None';
-  let username = 'testuser';
-  
-  result = await contract.get_balance({ account_id: username }).catch( (err) => {  
-    console.log(err);
-    res.status(500).send();
-  })
-
   res.json(result);
 });
 

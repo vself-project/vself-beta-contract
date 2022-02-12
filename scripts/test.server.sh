@@ -4,11 +4,12 @@ set -e
 USER_ID=ilerik.testnet
 
 # Views
-curl -v http://localhost:8080/version
-curl -v http://localhost:8080/status
-curl -v http://localhost:8080/rewards?nearid=ilerik.testnet
+curl http://localhost:8080/version && echo ""
+curl http://localhost:8080/status && echo ""
+curl http://localhost:8080/rewards && echo ""
+curl "http://localhost:8080/rewards?nearid='ilerik.testnet'" && echo ""
 
 # Checkin and balance
-curl -v "http://localhost:8080/checkin?nearid='ilerik.testnet'&qr='http://2'"
-curl -v http://localhost:8080/rewards?nearid=ilerik.testnet
+curl "http://localhost:8080/checkin?nearid='ilerik.testnet'&qr='http://2'"
+curl "http://localhost:8080/rewards?nearid='ilerik.testnet'"
 

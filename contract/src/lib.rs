@@ -62,6 +62,16 @@ pub struct ActionData {
     reward_index: usize,    
 }
 
+#[derive(Clone)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct ActionResult {
+    index: usize,
+    got: bool,
+    title: String,
+    description: String,
+}
+
 /// This is format of output via JSON for the user balance.
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
@@ -188,7 +198,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn checkin(&mut self, username: String, request: String) -> Option<usize> {
+    pub fn checkin(&mut self, username: String, request: String) -> Option<ActionResult> {
         // Assert event is active
         assert!( self.event.is_some(), "No event is running" );
         let timestamp: u64 = env::block_timestamp();        
@@ -227,29 +237,45 @@ impl Contract {
 
         // Register action        
         self.last_action_index += 1;
-        self.actions.push(&action_data);
+        self.actions.push(&action_data.clone());
         stats.total_actions += 1;
 
         // Check if we've been awarded a reward
-        if let Some(_) = quests.get(reward_index) {  
+        if let Some(quest) = quests.get(reward_index) {  
             // Update state if we are lucky          
             stats.total_rewards += 1;          
             self.stats = Some(stats);
 
             // Update user balance
             let mut balance = self.balances.get(&user_account_id).expect("ERR_NOT_REGISTERED");
-            balance.quests_status[reward_index] = true;
-            self.balances.insert(&user_account_id, &balance);
-            
-            // NFT Part (issue token)
-            self.issue_nft_reward(user_account_id.clone(), reward_index.clone());  
+            balance.karma_balance += 1; // Number of successfull actions
 
-            log!("Checkin successful! User: {}, Quest: {}", username, reward_index.clone());
-            return Some(reward_index);
+            // Do we have this reward already            
+            if (balance.quests_status[reward_index]) { // Yes
+                self.balances.insert(&user_account_id, &balance);
+                return Some(ActionResult {
+                    index: reward_index,
+                    got: true,
+                    title: quest.reward_title.clone(),
+                    description: quest.reward_description.clone(),
+                });                
+            } else { // No
+                balance.quests_status[reward_index] = true;
+                self.balances.insert(&user_account_id, &balance);
+
+                // NFT Part (issue token)
+                self.issue_nft_reward(user_account_id.clone(), reward_index.clone());                  
+
+                return Some(ActionResult {
+                    index: reward_index,
+                    got: false,
+                    title: quest.reward_title.clone(),
+                    description: quest.reward_description.clone(),
+                });
+            }                                     
         } else {
             // Update state if we are not
             self.stats = Some(stats);       
-
             log!("No reward for this checkin! User: {}", username);
             return None;            
         }                        

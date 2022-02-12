@@ -29,11 +29,11 @@ sh.exec(`near view ${contractName} get_user_balance '{"account_id": "ilerik.test
 sh.exec(`near view ${contractName} get_user_balance '{"account_id": "sergantche.testnet"}'`);
 sh.exec(`near view ${contractName} get_actions '{"from_index": 0, "limit": 100}'`);
 
-console.log("Finishing event...");
-sh.exec(`near call ${contractName} stop_event --accountId ${contractName}`);
-sh.exec(`near view ${contractName} get_past_events '{"from_index": 0, "limit": 100}'`);
-sh.exec(`near view ${contractName} get_actions '{"from_index": 0, "limit": 100}'`);
-sh.exec(`near view ${contractName} get_past_event_actions '{"event_id": 0, "from_index": 0, "limit": 100}'`);
+// console.log("Finishing event...");
+// sh.exec(`near call ${contractName} stop_event --accountId ${contractName}`);
+// sh.exec(`near view ${contractName} get_past_events '{"from_index": 0, "limit": 100}'`);
+// sh.exec(`near view ${contractName} get_actions '{"from_index": 0, "limit": 100}'`);
+// sh.exec(`near view ${contractName} get_past_event_actions '{"event_id": 0, "from_index": 0, "limit": 100}'`);
 
 // exit script with the same code as the build command
 process.exit()
