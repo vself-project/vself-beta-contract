@@ -23,7 +23,7 @@ const { nodeUrl, networkId, contractName } = nearConfig;
 const contractMethods = 
 {
   changeMethods: [ 'checkin' ],
-  viewMethods: ['version', 'get_user_balance', 'get_event_data'],
+  viewMethods: ['version', 'get_user_balance_extra', 'get_event_data'],
 }
 
 const {
@@ -75,25 +75,20 @@ const contract = new Contract(contractAccount, contractName, contractMethods);
 
 // Logic API
 app.get("/version", async (req, res) => {
-  let result = 'None';
-  
-  result = await contract.version().catch( (err) => {  
+  let result = await contract.version().catch( (err) => {  
     res.status(500).send();
   })
-
   res.json(result);
 });
 
 // Get status of current event
 app.get("/status", async (req, res) => {
   let result;
-
-  // Number of rewards
+  // Number of rewards (0 - for no event)
   result = await contract.get_event_data().catch( (err) => {  
-    res.status(500).send();
-  })
-
-  res.json(result);
+    res.json(0);
+  });
+  res.json(result.quests.length);
 });
 
 // Balance of a single player or list of NFT rewards
@@ -104,27 +99,22 @@ app.get("/rewards", async (req, res) => {
   if (nearid) { // If username is provided we need to return user balance
     let account_id = nearid.slice(1, -1); // Extract account id
     console.log("Account ID: ", account_id);
-    result = await contract.get_user_balance({ account_id }).catch( (err) => {  
+    await contract.get_user_balance_extra({ account_id }).catch( (err) => {  
       console.log(err);
       res.status(200).send();
     }).then( balance_data => {
-      console.log("Balance: ", balance_data.quests_status);
-      result = balance_data.quests_status;
+      console.log("Balance: ", balance_data);
+      result = balance_data;
     })
   } else { // If it's a request and we need to return list of NFTs
-    result = await contract.get_event_data().catch( (err) => {  
+    await contract.get_event_data().catch( (err) => {  
       console.log(err);
       res.status(200).send();
     }).then( event_data => {
-      console.log(event_data);
-    })
-    // result = [{
-    //   index: 0,
-    //   got: true,
-    //   url: rewards[0].url,
-    //   title: rewards[0].title,
-    //   description: rewards[0].description,
-    // }]
+      console.log("Event Data: ", event_data);
+      result = event_data.quests.map(quest => quest.reward_url);
+      console.log(result);
+    })    
   }
 
   res.json(result);
@@ -133,14 +123,14 @@ app.get("/rewards", async (req, res) => {
 // Checkin
 app.get("/checkin", async (req, res) => {
   let result = 'None';
-  console.log(req.query);
   const username = req.query.nearid.slice(1, -1);
   const request = req.query.qr.slice(1, -1);
-  const minting_cost = "100000000000000000000000";
+  const gas_cost = 300000000000000;
+  const minting_cost = "100000000000000000000000";  
+  console.log("Incoming action: {} {}", username, request);
   
-  console.log(request);
-  
-  result = await contract.checkin({args: { username, request }, gas: 300000000000000, amount: minting_cost }).catch( (err) => {  
+  result = await contract.checkin({args: { username, request }, gas: gas_cost, amount: minting_cost })
+  .catch( (err) => {  
     console.log(err);
     res.status(200).send();
   })
@@ -148,6 +138,7 @@ app.get("/checkin", async (req, res) => {
   res.json(result);
 });
 
+// Spin up server
 app.use(cors());
 app.use(express.json());
 app.options("*", cors());

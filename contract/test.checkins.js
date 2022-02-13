@@ -8,6 +8,10 @@ const contractName = process.env.CONTRACT_NAME || fs.readFileSync('./neardev/dev
 // Emulate several checkins
 console.log("Simulating event...");
 sh.exec(`near call ${contractName} checkin '{"username": "meta_irony.testnet", "request": "http://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "http://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "randomtext" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
 
 // exit script with the same code as the build command
 process.exit()

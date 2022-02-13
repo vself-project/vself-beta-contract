@@ -22,6 +22,8 @@ RUN mkdir -p ./config
 COPY config/near.js ./config/
 
 # Run the web service on container startup.
+# RUN export << ./config/testnet-account.env
+ENV CONTRACT_NAME beta_v5.ilerik.testnet
 RUN mkdir -p ./creds
-COPY creds/beta_v4.ilerik.testnet.json ./creds
+COPY creds/beta_v5.ilerik.testnet.json ./creds
 CMD [ "node", "server.js" ]

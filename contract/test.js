@@ -17,12 +17,6 @@ sh.exec(`near view ${contractName} get_event_stats --accountId ${contractName}`)
 
 // Emulate several checkins
 console.log("Simulating event...");
-sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "http://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
-sh.exec(`near view ${contractName} get_event_stats`);
-sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "randomtext" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
-sh.exec(`near view ${contractName} get_event_stats`);
-sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
-sh.exec(`near view ${contractName} get_event_stats`);
 sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
 sh.exec(`near view ${contractName} get_event_stats`);
 sh.exec(`near view ${contractName} get_user_balance '{"account_id": "ilerik.testnet"}'`);

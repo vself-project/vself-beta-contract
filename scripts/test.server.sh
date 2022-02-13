@@ -10,6 +10,6 @@ curl http://localhost:8080/rewards && echo ""
 curl "http://localhost:8080/rewards?nearid='ilerik.testnet'" && echo ""
 
 # Checkin and balance
-curl "http://localhost:8080/checkin?nearid='ilerik.testnet'&qr='http://2'"
-curl "http://localhost:8080/rewards?nearid='ilerik.testnet'"
+curl "http://localhost:8080/checkin?nearid='ilerik.testnet'&qr='https://2'" && echo ""
+curl "http://localhost:8080/rewards?nearid='ilerik.testnet'" && echo ""
 

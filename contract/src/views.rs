@@ -1,5 +1,16 @@
 use crate::*;
 
+
+/// This is format of output via JSON for the user balance.
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct UserBalanceOutput {    
+    index: usize,
+    got: bool,
+    title: String,
+    description: String,
+}
+
 #[near_bindgen]
 impl Contract {
     /// Returns semver of this contract.
@@ -28,6 +39,28 @@ impl Contract {
     /// Return user balance
     pub fn get_user_balance(&self, account_id: AccountId) -> Option<UserBalance> {
         self.balances.get(&account_id)
+    }
+
+    /// Return user balance (with extra data)
+    pub fn get_user_balance_extra(&self, account_id: AccountId) -> Vec<UserBalanceOutput> {        
+        match self.balances.get(&account_id) {
+            Some(balance) => {
+                let quests = self.event.as_ref().unwrap().quests.clone();        
+                let mut i = 0;
+                let mut result = vec![];
+                for quest in &quests {
+                    result.push(UserBalanceOutput {
+                        index: i,
+                        got: balance.quests_status[i],
+                        title: quest.reward_title.clone(),
+                        description: quest.reward_description.clone(),
+                    });                              
+                    i += 1;
+                }                
+                result
+            },
+            None => vec![],
+        }
     }
 
     /// Get all user actions for current event (supports pagination)
