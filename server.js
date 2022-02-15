@@ -93,6 +93,22 @@ app.get("/status", async (req, res) => {
 
 // Balance of a single player or list of NFT rewards
 app.get("/rewards", async (req, res) => {    
+  let result = [];
+  let nearid = req.query.nearid;  
+  
+  await contract.get_event_data().catch( (err) => {  
+    console.log(err);
+    res.status(200).send();
+  }).then( event_data => {
+    console.log("Event Data: ", event_data);
+    result = event_data.quests.map(quest => quest.reward_url);  
+  })    
+
+  res.json(result);
+});
+
+// Balance of a single player or list of NFT rewards
+app.get("/balance", async (req, res) => {    
   let result = 'None';
   let nearid = req.query.nearid;  
 
@@ -119,6 +135,7 @@ app.get("/rewards", async (req, res) => {
 
   res.json(result);
 });
+
 
 // Checkin
 app.get("/checkin", async (req, res) => {
