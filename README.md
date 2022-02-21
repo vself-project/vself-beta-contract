@@ -2,6 +2,9 @@
 
 Current repository contains backend source code and tooling which was developed during NEAR Metabuild Hackathon.
 
+For web application frontend look into another [repo](https://github.com/vself-project/vself-beta). 
+For mobile application to run throug our [quest](https://vself.app/quest) can be downloaded [here](https://vself-dev.web.app/vself.apk).
+
 ### Event Lifecycle (User story)
 
 1. Event is initiated and setup through web app interface
