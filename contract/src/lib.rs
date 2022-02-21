@@ -132,7 +132,7 @@ impl Contract {
 
         let metadata = NFTContractMetadata {
             spec: NFT_METADATA_SPEC.to_string(),
-            name: "vSelf NEAR NFT checkins".to_string(),
+            name: "vSelf Metabuild Event Quest".to_string(),
             symbol: "VSLF".to_string(),
             icon: Some(DATA_IMAGE_SVG_NEAR_ICON.to_string()),
             base_uri: Some(BASE_URI.to_string()),
@@ -228,10 +228,11 @@ impl Contract {
 
         // Check if we have a new user
         if stats.participants.insert(user_account_id.clone()) {
-            stats.total_users += 1;
+            stats.total_users += 1;            
+            
             self.balances.insert(&user_account_id, &UserBalance {
                 karma_balance: 0,
-                quests_status: vec![false, false],
+                quests_status: vec![false; quests.len()],
             });
         }
 

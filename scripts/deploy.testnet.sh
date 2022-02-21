@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-ID=beta_v5.ilerik.testnet
+ID=beta_v8.ilerik.testnet
 
 # recreate account
 # near delete $ID ilerik.testnet

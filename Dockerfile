@@ -1,4 +1,4 @@
-# Use the official lightweight Node.js 14 image.
+# Use the official lightweight Node.js 12 image.
 # https://hub.docker.com/_/node
 FROM node:14-slim
 
@@ -6,24 +6,16 @@ FROM node:14-slim
 WORKDIR /usr/src/app
 
 # Copy application dependency manifests to the container image.
-# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
-# Copying this first prevents re-running npm install on every code change.
+# A wildcard is used to ensure both package.json AND package-lock.json are copied.
+# Copying this separately prevents re-running npm install on every code change.
 COPY package*.json ./
-COPY yarn.lock ./
 
 # Install production dependencies.
-# If you add a package-lock.json, speed your build by switching to 'npm ci'.
-# RUN npm ci --only=production
 RUN npm install --only=production
 
 # Copy local code to the container image.
-COPY server.js ./
-RUN mkdir -p ./config
-COPY config/near.js ./config/
+COPY . ./
+ENV CONTRACT_NAME beta_v8.ilerik.testnet
 
 # Run the web service on container startup.
-# RUN export << ./config/testnet-account.env
-ENV CONTRACT_NAME beta_v5.ilerik.testnet
-RUN mkdir -p ./creds
-COPY creds/beta_v5.ilerik.testnet.json ./creds
-CMD [ "node", "server.js" ]
+CMD [ "npm", "start" ]

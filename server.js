@@ -18,8 +18,6 @@ const io = require("socket.io")(server, {
 
 const nearConfig = getConfig(process.env.APP_ENV || 'development')
 const { nodeUrl, networkId, contractName } = nearConfig;
-//const contractName = process.env.CONTRACT_NAME;
-//const contractName = "beta_v4.ilerik.testnet"
 const contractMethods = 
 {
   changeMethods: [ 'checkin' ],
@@ -40,13 +38,11 @@ const {
 // Load credentials
 console.log(
   "Loading Credentials:\n",
-  `./creds/${contractName}.json`
-  //`${process.env.HOME}/.near-credentials/${networkId}/${contractName}.json`
+  `./creds/${contractName}.json`  
 );
 const credentials = JSON.parse(
   fs.readFileSync(
-    `./creds/${contractName}.json`
-    //`${process.env.HOME}/.near-credentials/${networkId}/${contractName}.json`
+    `./creds/${contractName}.json`    
   )
 );
 
@@ -102,7 +98,7 @@ app.get("/rewards", async (req, res) => {
   }).then( event_data => {
     console.log("Event Data: ", event_data);
     result = event_data.quests.map(quest => quest.reward_url);  
-  })    
+  })   
 
   res.json(result);
 });
@@ -149,9 +145,22 @@ app.get("/checkin", async (req, res) => {
   result = await contract.checkin({args: { username, request }, gas: gas_cost, amount: minting_cost })
   .catch( (err) => {  
     console.log(err);
-    res.status(200).send();
+    res.json({
+      index: -1,
+      got: false,
+      title: "nothing",
+      description: "nothing"
+    });
   })
   console.log(result);
+  if (result === null) {
+    res.json({
+      index: -1,
+      got: false,
+      title: "nothing",
+      description: "nothing"
+    });
+  }
   res.json(result);
 });
 
