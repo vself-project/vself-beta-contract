@@ -97,7 +97,7 @@ app.get("/rewards", async (req, res) => {
     res.status(200).send();
   }).then( event_data => {
     console.log("Event Data: ", event_data);
-    result = event_data.quests.map(quest => quest.reward_url);  
+    result = event_data.quests.map(quest => quest.reward_uri);
   })   
 
   res.json(result);
@@ -124,7 +124,7 @@ app.get("/balance", async (req, res) => {
       res.status(200).send();
     }).then( event_data => {
       console.log("Event Data: ", event_data);
-      result = event_data.quests.map(quest => quest.reward_url);
+      result = event_data.quests.map(quest => quest.reward_uri);
       console.log(result);
     })    
   }

@@ -24,7 +24,7 @@ pub struct QuestData {
     pub qr_prefix: String,    
     pub reward_title: String,
     pub reward_description: String,
-    pub reward_url: String,
+    pub reward_uri: String,
 }
 
 // Current event data
@@ -251,7 +251,7 @@ impl Contract {
             balance.karma_balance += 1; // Number of successfull actions
 
             // Do we have this reward already            
-            if (balance.quests_status[reward_index]) { // Yes
+            if balance.quests_status[reward_index] { // Yes
                 self.balances.insert(&user_account_id, &balance);
                 return Some(ActionResult {
                     index: reward_index,
