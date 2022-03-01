@@ -23,22 +23,22 @@ sh.exec(`near call ${contractName} start_event '{"event": {
       "reward_uri": "/nft1.png"
     },
     {
-      "qr_prefix": 'You have registered in the NEAR community',
-      "reward_description": 'You have registered in the NEAR community',
-      "reward_title": 'vSelf: NEAR User Badge',
-      "reward_uri": '/nft2.png'
+      "qr_prefix": "You have registered in the NEAR community",
+      "reward_description": "You have registered in the NEAR community",
+      "reward_title": "vSelf: NEAR User Badge",
+      "reward_uri": "/nft2.png"
     },
     {
-      "qr_prefix": 'Congrats! Now you know more about Web3',
-      "reward_description": 'Congrats! Now you know more about Web3',
-      "reward_title": 'vSelf: Early Adopter Badge',
-      "reward_uri": '/nft3.png'
+      "qr_prefix": "Congrats! Now you know more about Web3",
+      "reward_description": "Congrats! Now you know more about Web3",
+      "reward_title": "vSelf: Early Adopter Badge",
+      "reward_uri": "/nft3.png"
     },
     {
-      "qr_prefix": 'Thank you <3 and see you soon!',
-      "reward_description": 'Thank you <3 and see you soon!',
-      "reward_title": 'vSelf: Metabuidl Badge',
-      "reward_uri": '/nft4.png'
+      "qr_prefix": "Thank you <3 and see you soon!",
+      "reward_description": "Thank you <3 and see you soon!",
+      "reward_title": "vSelf: Metabuidl Badge",
+      "reward_uri": "/nft4.png"
     }],
   "start_time": ${new Date().getTime() * 1000000}}}' --accountId ${contractName}`);
 sh.exec(`near view ${contractName} get_event_data --accountId ${contractName}`);
@@ -46,11 +46,11 @@ sh.exec(`near view ${contractName} get_event_stats --accountId ${contractName}`)
 
 // Emulate several checkins
 console.log("Simulating event...");
-// sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
-// sh.exec(`near view ${contractName} get_event_stats`);
-// sh.exec(`near view ${contractName} get_user_balance '{"account_id": "ilerik.testnet"}'`);
-// sh.exec(`near view ${contractName} get_user_balance '{"account_id": "sergantche.testnet"}'`);
-// sh.exec(`near view ${contractName} get_actions '{"from_index": 0, "limit": 100}'`);
+sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near view ${contractName} get_event_stats`);
+sh.exec(`near view ${contractName} get_user_balance '{"account_id": "ilerik.testnet"}'`);
+sh.exec(`near view ${contractName} get_user_balance '{"account_id": "sergantche.testnet"}'`);
+sh.exec(`near view ${contractName} get_actions '{"from_index": 0, "limit": 100}'`);
 
 // console.log("Finishing event...");
 // sh.exec(`near call ${contractName} stop_event --accountId ${contractName}`);

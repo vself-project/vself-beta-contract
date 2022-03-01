@@ -251,7 +251,7 @@ impl Contract {
             balance.karma_balance += 1; // Number of successfull actions
 
             // Do we have this reward already            
-            if (balance.quests_status[reward_index]) { // Yes
+            if balance.quests_status[reward_index] { // Yes
                 self.balances.insert(&user_account_id, &balance);
                 return Some(ActionResult {
                     index: reward_index,
