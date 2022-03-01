@@ -24,7 +24,7 @@ pub struct QuestData {
     pub qr_prefix: String,    
     pub reward_title: String,
     pub reward_description: String,
-    pub reward_url: String,
+    pub reward_uri: String,
 }
 
 // Current event data

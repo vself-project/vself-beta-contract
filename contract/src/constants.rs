@@ -16,25 +16,25 @@ pub fn mock_event_data() -> EventData {
                 qr_prefix: "https://vself-dev.web.app/vself.apk".to_string(),                
                 reward_title: "vSelf: Welcome Badge".to_string(),
                 reward_description: "Welcome to the vSelf demo!".to_string(),
-                reward_url: "https://vself-dev.web.app/nft1.png".to_string(),
+                reward_uri: "https://vself-dev.web.app/nft1.png".to_string(),
             }, 
             QuestData{
                 qr_prefix: "You have registered in the NEAR community".to_string(),
                 reward_title: "vSelf: NEAR User Badge".to_string(),
                 reward_description: "You have registered in the NEAR community".to_string(),
-                reward_url: "https://vself-dev.web.app/nft2.png".to_string(),
+                reward_uri: "https://vself-dev.web.app/nft2.png".to_string(),
             },
             QuestData{ 
                 qr_prefix: "Congrats! Now you know more about Web3".to_string(),                
                 reward_title: "vSelf: Early Adopter Badge".to_string(),
                 reward_description: "Congrats! Now you know more about Web3".to_string(),
-                reward_url: "https://vself-dev.web.app/nft3.png".to_string(),
+                reward_uri: "https://vself-dev.web.app/nft3.png".to_string(),
             },
             QuestData{ 
                 qr_prefix: "Thank you <3 and see you soon!".to_string(),                
                 reward_title: "vSelf: Love Badge".to_string(),
                 reward_description: "Thank you <3 and see you soon!".to_string(),
-                reward_url: "https://vself-dev.web.app/nft4.png".to_string(),
+                reward_uri: "https://vself-dev.web.app/nft4.png".to_string(),
             }          
         ],
     }

@@ -37,7 +37,7 @@ impl Contract {
 
         let quest = self.event.as_ref().unwrap().quests.get(reward_index).unwrap();                                                                     
         let token_id_with_timestamp: String = format!("{}:{}:{}", self.event_id.clone(), reward_index.clone(), timestamp);
-        let media_url: String = format!("{}", quest.reward_url);
+        let media_url: String = format!("{}", quest.reward_uri);
         let media_hash = Base64VecU8(env::sha256(media_url.as_bytes()));
 
         let token_metadata = TokenMetadata {
