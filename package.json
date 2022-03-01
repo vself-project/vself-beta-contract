@@ -5,13 +5,13 @@
   "scripts": {
     "build": "node contract/compile.js",
     "build:debug": "node contract/compile.js --debug",
-    "test": "env-cmd -f ./neardev/dev-account.env node contract/test.js",    
+    "test": "env-cmd -f ./neardev/dev-account.env node contract/test.js",
     "dev:deploy": "npm run build && rm -rf neardev && near dev-deploy && env-cmd -f ./neardev/dev-account.env node contract/init.js",
     "deploy": "./scripts/deploy.testnet.sh",
     "test:testnet": "env-cmd -f ./config/testnet-account.env node contract/test.js",
     "test:testnet:checkin": "env-cmd -f ./config/testnet-account.env node contract/test.checkins.js",
     "dev:server": "env-cmd -f ./neardev/dev-account.env node server.js",
-    "server": "env-cmd -f ./config/testnet-account.env node server.js",    
+    "server": "env-cmd -f ./config/testnet-account.env node server.js",
     "deploy:server": "gcloud builds submit --project vself-dev --tag gcr.io/vself-dev/vself-api-server",
     "test:server": "./scripts/test.server.sh",
     "clean": "rm -rf ./creds/*"

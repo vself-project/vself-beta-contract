@@ -163,14 +163,13 @@ impl Contract {
     }
     
     // Initiate next event
-    pub fn start_event(&mut self) {
+    pub fn start_event(&mut self, event: EventData) {
         assert!( self.event.is_none() );        
         let timestamp: u64 = env::block_timestamp();        
 
         self.actions_from.push(&self.last_action_index);
 
-        let test_data = constants::mock_event_data();
-        self.event = Some(test_data);
+        self.event = Some(event);
         self.stats = Some(EventStats {
             participants: HashSet::new(),
             start_time: timestamp,
