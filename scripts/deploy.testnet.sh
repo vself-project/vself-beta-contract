@@ -3,7 +3,7 @@ set -e
 
 # ID=beta_v8.ilerik.testnet
 # MasterAccount=ilerik.testnet
-ID=beta_v9.sergantche.testnet
+ID=beta_v10.sergantche.testnet
 MasterAccount=sergantche.testnet
 
 # recreate account
