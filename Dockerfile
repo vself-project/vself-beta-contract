@@ -15,7 +15,7 @@ RUN npm install --only=production
 
 # Copy local code to the container image.
 COPY . ./
-ENV CONTRACT_NAME beta_v8.ilerik.testnet
+ENV CONTRACT_NAME beta_v9.sergantche.testnet
 
 # Run the web service on container startup.
 CMD [ "npm", "start" ]
