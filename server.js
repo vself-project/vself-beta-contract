@@ -90,7 +90,7 @@ app.get("/status", async (req, res) => {
 // Balance of a single player or list of NFT rewards
 app.get("/rewards", async (req, res) => {    
   let result = [];
-  let nearid = req.query.nearid;  
+  let nearid = req.query.nearid;
   
   await contract.get_event_data().catch( (err) => {  
     console.log(err);
@@ -132,7 +132,6 @@ app.get("/balance", async (req, res) => {
   res.json(result);
 });
 
-
 // Checkin
 app.get("/checkin", async (req, res) => {
   let result = 'None';
@@ -160,6 +159,24 @@ app.get("/checkin", async (req, res) => {
       title: "nothing",
       description: "nothing"
     });
+  }
+  res.json(result);
+});
+
+// Check that account is valid (only for testnet)
+app.get("/check-account", async (req, res) => {
+  let result = 'None';
+  try {
+    let nearid = req.query.nearid;
+    const response = await fetch('https://explorer.testnet.near.org/accounts/' + nearid);
+    const resText = await response.text();
+    result = !resText.includes('check if the account name');
+  } catch (err) {
+    console.log(err);
+    res.json({
+      err
+    });
+    return;
   }
   res.json(result);
 });
