@@ -3,7 +3,13 @@
 // makes it easy to use *NIX-style scripting (which works on Linux distros,
 // macOS, and Unix systems) on Windows as well.
 const sh = require('shelljs')
+const { createHash } = require('crypto');
 const contractName = process.env.CONTRACT_NAME || fs.readFileSync('./neardev/dev-account').toString();
+
+// SHA-256 hash
+const hash = (msg) => {
+  return createHash('sha256').update(msg).digest('hex');
+}
 
 // Testing views
 sh.exec(`near view ${contractName} is_active`);
@@ -18,28 +24,28 @@ sh.exec(`near call ${contractName} start_event '{"event": {
   "event_name": "vSelf Onboarding Metabuild Quest",
   "finish_time": ${new Date().getTime() * 1000000 + 30 * 24 * 60 * 60 * 1000000},
   "quests": [{
-      "qr_prefix_enc": "https://vself-dev.web.app/vself.apk",
+      "qr_prefix_enc": "${hash('https://vself-dev.web.app/vself.apk')}",
       "qr_prefix_len": ${"https://vself-dev.web.app/vself.apk".length},
       "reward_description": "Welcome to the vSelf demo!",
       "reward_title": "vSelf: Welcome Badge",
       "reward_uri": "/nft1.png"
     },
     {
-      "qr_prefix_enc": "You have registered in the NEAR community",
+      "qr_prefix_enc": "${hash('You have registered in the NEAR community')}",
       "qr_prefix_len": ${"You have registered in the NEAR community".length},
       "reward_description": "You have registered in the NEAR community",
       "reward_title": "vSelf: NEAR User Badge",
       "reward_uri": "/nft2.png"
     },
     {
-      "qr_prefix_enc": "Congrats! Now you know more about Web3",
+      "qr_prefix_enc": "${hash('Congrats! Now you know more about Web3')}",
       "qr_prefix_len": ${"Congrats! Now you know more about Web3".length},
       "reward_description": "Congrats! Now you know more about Web3",
       "reward_title": "vSelf: Early Adopter Badge",
       "reward_uri": "/nft3.png"
     },
     {
-      "qr_prefix_enc": "Thank you <3 and see you soon!",
+      "qr_prefix_enc": "${hash('Thank you <3 and see you soon!')}",
       "qr_prefix_len": ${"Thank you <3 and see you soon!".length},
       "reward_description": "Thank you <3 and see you soon!",
       "reward_title": "vSelf: Metabuidl Badge",
@@ -52,9 +58,10 @@ sh.exec(`near view ${contractName} get_event_stats --accountId ${contractName}`)
 // Emulate several checkins
 console.log("..................................");
 console.log("Simulating event...");
-sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "Ground control to major Tom" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
 sh.exec(`near view ${contractName} get_event_stats`);
 sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "Congrats! Now you know more about Web3" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "You have registered in the NEAR community" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
 sh.exec(`near view ${contractName} get_event_stats`);
 sh.exec(`near view ${contractName} get_user_balance '{"account_id": "ilerik.testnet"}'`);
 sh.exec(`near view ${contractName} get_user_balance '{"account_id": "sergantche.testnet"}'`);
