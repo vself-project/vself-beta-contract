@@ -6,7 +6,7 @@ const DELETE_BEFORE_DEPLOY = process.env.DELETE_BEFORE_DEPLOY === "true";
 if (DELETE_BEFORE_DEPLOY) {
   sh.exec(`near delete ${CONTRACT_NAME} ${MASTER_ACCOUNT}`);
 }
-sh.exec(`near create-account ${CONTRACT_NAME} --masterAccount=${MASTER_ACCOUNT} --initial-balance 100`);
+sh.exec(`near create-account ${CONTRACT_NAME} --masterAccount=${MASTER_ACCOUNT} --initial-balance 80`);
 
 // Deploy contract
 sh.exec(`near deploy --wasmFile out/main.wasm --accountId ${CONTRACT_NAME}`);
