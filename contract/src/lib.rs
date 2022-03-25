@@ -257,8 +257,10 @@ impl Contract {
         let quests = self.event.as_ref().unwrap().quests.clone();        
         let mut reward_index = 0;
         for quest in &quests {
-            let request_prefix = request.substring(0, quest.qr_prefix_len.clone());          
-            if request_prefix.starts_with(&quest.qr_prefix_enc) { break };
+            let request_prefix = request.substring(0, quest.qr_prefix_len.clone());
+            let hashed_input = env::sha256(request_prefix.as_bytes());
+            let hashed_input_hex = hex::encode(&hashed_input);
+            if hashed_input_hex.starts_with(&quest.qr_prefix_enc) { break };
             reward_index = reward_index + 1;
         }
         

@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 near-sdk = "4.0.0-pre.5"
 near-contract-standards = "4.0.0-pre.5"
+hex = "0.4.3"
 
 [profile.release]
 codegen-units = 1
