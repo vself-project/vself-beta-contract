@@ -17,12 +17,57 @@ pub mod nft;
 use near_sdk::ONE_YOCTO;
 use constants::SINGLE_CALL_GAS;
 
+use std::ops::{Bound, RangeBounds};
+
+trait StringUtils {
+    fn substring(&self, start: usize, len: usize) -> &str;
+    fn slice(&self, range: impl RangeBounds<usize>) -> &str;
+}
+
+impl StringUtils for str {
+    fn substring(&self, start: usize, len: usize) -> &str {
+        let mut char_pos = 0;
+        let mut byte_start = 0;
+        let mut it = self.chars();
+        loop {
+            if char_pos == start { break; }
+            if let Some(c) = it.next() {
+                char_pos += 1;
+                byte_start += c.len_utf8();
+            }
+            else { break; }
+        }
+        char_pos = 0;
+        let mut byte_end = byte_start;
+        loop {
+            if char_pos == len { break; }
+            if let Some(c) = it.next() {
+                char_pos += 1;
+                byte_end += c.len_utf8();
+            }
+            else { break; }
+        }
+        &self[byte_start..byte_end]
+    }
+    fn slice(&self, range: impl RangeBounds<usize>) -> &str {
+        let start = match range.start_bound() {
+            Bound::Included(bound) | Bound::Excluded(bound) => *bound,
+            Bound::Unbounded => 0,
+        };
+        let len = match range.end_bound() {
+            Bound::Included(bound) => *bound + 1,
+            Bound::Excluded(bound) => *bound,
+            Bound::Unbounded => self.len(),
+        } - start;
+        self.substring(start, len)
+    }
+}
 #[derive(Clone)]
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct QuestData {
     pub qr_prefix_enc: String,
-    pub qr_prefix_len: u8,    
+    pub qr_prefix_len: usize,    
     pub reward_title: String,
     pub reward_description: String,
     pub reward_uri: String,
@@ -211,8 +256,9 @@ impl Contract {
         let qr_string = request.clone();
         let quests = self.event.as_ref().unwrap().quests.clone();        
         let mut reward_index = 0;
-        for quest in &quests {            
-            if request.starts_with(&quest.qr_prefix_enc) { break };
+        for quest in &quests {
+            let request_prefix = request.substring(0, quest.qr_prefix_len.clone());          
+            if request_prefix.starts_with(&quest.qr_prefix_enc) { break };
             reward_index = reward_index + 1;
         }
         

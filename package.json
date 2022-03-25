@@ -5,8 +5,8 @@
   "scripts": {
     "build": "node contract/compile.js",
     "build:debug": "node contract/compile.js --debug",
-    "test": "env-cmd -f ./neardev/dev-account.env node contract/test.js",
     "dev:deploy": "npm run build && rm -rf neardev && near dev-deploy && env-cmd -f ./neardev/dev-account.env node contract/init.js",
+    "test": "env-cmd -f ./neardev/dev-account.env node contract/test.js",
     "deploy": "env-cmd -f ./config/testnet-account.env node scripts/deploy.testnet.js",
     "test:testnet": "env-cmd -f ./config/testnet-account.env node contract/test.js",
     "test:testnet:checkin": "env-cmd -f ./config/testnet-account.env node contract/test.checkins.js",

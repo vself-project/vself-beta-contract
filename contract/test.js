@@ -14,7 +14,7 @@ console.log("..................................");
 console.log("Starting event...");
 sh.exec(`near call ${contractName} start_event '{"event": {
     "event_description":
-    "vSelf lauches a series of quests which will keep you motivated while you learn about our project and its place inside NEAR ecosystem",
+    "vSelf launches a series of quests which will keep you motivated while you learn about our project and its place inside NEAR ecosystem",
   "event_name": "vSelf Onboarding Metabuild Quest",
   "finish_time": ${new Date().getTime() * 1000000 + 30 * 24 * 60 * 60 * 1000000},
   "quests": [{
@@ -53,6 +53,8 @@ sh.exec(`near view ${contractName} get_event_stats --accountId ${contractName}`)
 console.log("..................................");
 console.log("Simulating event...");
 sh.exec(`near call ${contractName} checkin '{"username": "sergantche.testnet", "request": "https://1" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
+sh.exec(`near view ${contractName} get_event_stats`);
+sh.exec(`near call ${contractName} checkin '{"username": "ilerik.testnet", "request": "Congrats! Now you know more about Web3" }' --accountId ${contractName} --amount 1 --gas 300000000000000`);
 sh.exec(`near view ${contractName} get_event_stats`);
 sh.exec(`near view ${contractName} get_user_balance '{"account_id": "ilerik.testnet"}'`);
 sh.exec(`near view ${contractName} get_user_balance '{"account_id": "sergantche.testnet"}'`);
