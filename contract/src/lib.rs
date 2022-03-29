@@ -21,7 +21,8 @@ use constants::SINGLE_CALL_GAS;
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct QuestData {
-    pub qr_prefix: String,    
+    pub qr_prefix_enc: String,
+    pub qr_prefix_len: usize,    
     pub reward_title: String,
     pub reward_description: String,
     pub reward_uri: String,
@@ -210,10 +211,14 @@ impl Contract {
         let qr_string = request.clone();
         let quests = self.event.as_ref().unwrap().quests.clone();        
         let mut reward_index = 0;
-        for quest in &quests {            
-            if request.starts_with(&quest.qr_prefix) { break };
-            reward_index = reward_index + 1;
-        }
+        for quest in &quests {
+            if let Some(request_prefix) = request.get(0..quest.qr_prefix_len) {
+                let hashed_input = env::sha256(request_prefix.as_bytes());
+                let hashed_input_hex = hex::encode(&hashed_input);
+                if hashed_input_hex == quest.qr_prefix_enc { break };
+            }         
+            reward_index = reward_index + 1;            
+        }        
         
         let action_data = ActionData {
             username: username.clone(),

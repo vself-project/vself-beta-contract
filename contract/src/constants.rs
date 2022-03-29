@@ -1,5 +1,4 @@
 use near_sdk::Gas;
-use crate::*;
 
 // Prepaid gas for making a single simple call.
 pub const SINGLE_CALL_GAS: Gas = Gas(200000000000000);
