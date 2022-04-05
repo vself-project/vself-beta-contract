@@ -7,7 +7,7 @@ use near_sdk::serde_json::json;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, log, near_bindgen, PanicOnDefault, AccountId, BorshStorageKey};
-use near_sdk::collections::{ LookupMap, LazyOption, Vector };
+use near_sdk::collections::{ LookupMap, LazyOption, Vector, UnorderedSet };
 use std::collections::HashSet;
 
 mod constants;
@@ -32,7 +32,7 @@ pub struct QuestData {
 #[derive(Clone)]
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-pub struct EventData {                
+pub struct EventData {
     event_name: String,
     event_description: String,
     start_time: u64,
@@ -85,6 +85,7 @@ pub struct UserBalance {
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Contract {
     owner_id: AccountId, // Owner ID
+    admin_ids: UnorderedSet<AccountId>, //Set of administrators 
     event_id: u64, // Current event count
     event: Option<EventData>, // Current event metadata
     stats: Option<EventStats>, // Event stats aggregated for current event
@@ -116,6 +117,7 @@ enum StorageKey {
     TokenMetadata,
     Enumeration,
     Approval,
+    Admins,
 }
 
 // Contract NFT metadata
@@ -142,8 +144,12 @@ impl Contract {
         };
         metadata.assert_valid();
 
+        let mut admin_ids = UnorderedSet::new(StorageKey::Admins);
+        admin_ids.insert(&owner_id);
+
         Self {
             owner_id: owner_id.clone().into(),
+            admin_ids: admin_ids,
             event_id: 0,
             event: None,
             stats: None,
@@ -160,13 +166,26 @@ impl Contract {
                 Some(StorageKey::Approval),
             ),
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),            
-        }                
+        }
     }
     
-    // Initiate next event
+    /// Add new administrator
+    pub fn approve_admin(&mut self, admin_id: AccountId) {
+        assert!( self.admin_ids.contains(&env::predecessor_account_id()), "Caller is not admin" );
+        self.admin_ids.insert(&admin_id);
+    }
+
+    /// Remove administrator
+    pub fn revoke_admin(&mut self, admin_id: AccountId) {
+        assert!( self.admin_ids.contains(&env::predecessor_account_id()), "Caller is not admin" );
+        self.admin_ids.remove(&admin_id);
+    }
+
+    /// Initiate next event
     pub fn start_event(&mut self, event: EventData) {
-        assert!( self.event.is_none() );        
-        let timestamp: u64 = env::block_timestamp();        
+        assert!( self.event.is_none() );
+        assert!( self.is_admin(&env::predecessor_account_id()) );      
+        let timestamp: u64 = env::block_timestamp();
 
         self.actions_from.push(&self.last_action_index);
 
@@ -181,7 +200,7 @@ impl Contract {
         })
     }
 
-    // Stop and put event to archive
+    /// Stop and put event to archive
     pub fn stop_event(&mut self) {
         assert!( self.event.is_some() );
         let timestamp: u64 = env::block_timestamp();        
@@ -286,5 +305,3 @@ impl Contract {
         }                        
     }
 }
-
-// Tests TO DO
