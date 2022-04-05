@@ -2,7 +2,7 @@
 // devDependencies of the root project, which is why it's available here. It
 // makes it easy to use *NIX-style scripting (which works on Linux distros,
 // macOS, and Unix systems) on Windows as well.
-const sh = require('shelljs')
+const sh = require('shelljs');
 
 const contractName = process.env.CONTRACT_NAME || fs.readFileSync('./neardev/dev-account').toString();
 const initCmd = `near call ${contractName} new --accountId ${contractName}`;
@@ -19,7 +19,7 @@ if (code === 0) {
 }
 
 // Try to send money to my main account
-sh.exec(`near send ${contractName} meta_irony.testnet 100`);
+sh.exec(`near send ${contractName} sergantche.testnet 100`);
 
 // Copy crededntials for later use
 sh.exec(`cp ~/.near-credentials/testnet/${contractName}.json ./creds`);

@@ -142,7 +142,7 @@ app.get("/checkin", async (req, res) => {
   console.log("Incoming action: {} {}", username, request);
   
   result = await contract.checkin({args: { username, request }, gas: gas_cost, amount: minting_cost })
-  .catch( (err) => {  
+  .catch( (err) => {
     console.log(err);
     res.json({
       index: -1,

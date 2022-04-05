@@ -18,6 +18,11 @@ impl Contract {
         env!("CARGO_PKG_VERSION").to_string()
     }
 
+    /// Checks if the given account is an administrator
+    pub fn is_admin(&self, admin_id: &AccountId) -> bool {
+        self.admin_ids.contains(&admin_id)
+    }
+
     /// Event general status (on/off)
     pub fn is_active(&self) -> bool {
         match self.event {
