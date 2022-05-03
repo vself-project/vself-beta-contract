@@ -1,10 +1,9 @@
 use crate::*;
 
-
 /// This is format of output via JSON for the user balance.
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
-pub struct UserBalanceOutput {    
+pub struct UserBalanceOutput {
     index: usize,
     got: bool,
     title: String,
@@ -27,7 +26,7 @@ impl Contract {
     pub fn is_active(&self) -> bool {
         match self.event {
             Some(_) => true,
-            None => false
+            None => false,
         }
     }
 
@@ -47,10 +46,10 @@ impl Contract {
     }
 
     /// Return user balance (with extra data)
-    pub fn get_user_balance_extra(&self, account_id: AccountId) -> Vec<UserBalanceOutput> {        
+    pub fn get_user_balance_extra(&self, account_id: AccountId) -> Vec<UserBalanceOutput> {
         match self.balances.get(&account_id) {
             Some(balance) => {
-                let quests = self.event.as_ref().unwrap().quests.clone();        
+                let quests = self.event.as_ref().unwrap().quests.clone();
                 let mut i = 0;
                 let mut result = vec![];
                 for quest in &quests {
@@ -59,11 +58,11 @@ impl Contract {
                         got: balance.quests_status[i],
                         title: quest.reward_title.clone(),
                         description: quest.reward_description.clone(),
-                    });                              
+                    });
                     i += 1;
-                }                
+                }
                 result
-            },
+            }
             None => vec![],
         }
     }
@@ -71,8 +70,9 @@ impl Contract {
     /// Get all user actions for current event (supports pagination)
     /// - `from_index` is the index to start from.
     /// - `limit` is the maximum number of elements to return.
-    pub fn get_actions(&self, from_index: u64, limit: u64) -> Vec<ActionData> {  
-        if let None = self.event { // No event is running -> no actions
+    pub fn get_actions(&self, from_index: u64, limit: u64) -> Vec<ActionData> {
+        if let None = self.event {
+            // No event is running -> no actions
             log!("No ongoing event, sorry.");
             return vec![];
         }
@@ -86,7 +86,12 @@ impl Contract {
     /// Get all user actions for current event (supports pagination)
     /// - `from_index` is the index to start from.
     /// - `limit` is the maximum number of elements to return.
-    pub fn get_past_event_actions(&self, event_id: u64, from_index: u64, limit: u64) -> Vec<ActionData> {
+    pub fn get_past_event_actions(
+        &self,
+        event_id: u64,
+        from_index: u64,
+        limit: u64,
+    ) -> Vec<ActionData> {
         assert!(self.event_id > event_id, "Wrong event index");
         let actions_from = self.actions_from.get(event_id).unwrap();
         let from_index = actions_from + from_index; // Shift for current event
@@ -98,9 +103,9 @@ impl Contract {
     /// Get past events data (supports pagination)
     /// - `from_index` is the index to start from.
     /// - `limit` is the maximum number of elements to return.
-    pub fn get_past_events(&self, from_index: u64, limit: u64) -> Vec<(EventData, EventStats)> {          
+    pub fn get_past_events(&self, from_index: u64, limit: u64) -> Vec<(EventData, EventStats)> {
         (from_index..std::cmp::min(from_index + limit, self.past_events.len()))
             .map(|index| self.past_events.get(index).unwrap())
             .collect()
-    } 
+    }
 }

@@ -2,7 +2,7 @@
 
 Current repository contains backend source code and tooling which was developed during NEAR Metabuild Hackathon.
 
-For web application frontend look into another [repo](https://github.com/vself-project/vself-beta). 
+For web application frontend look into another [repo](https://github.com/vself-project/vself-beta).
 For mobile application to run throug our [quest](https://vself.app/quest) can be downloaded [here](https://vself-dev.web.app/vself.apk).
 
 ### Event Lifecycle (User story)
@@ -29,26 +29,28 @@ Contract serves as a registry for NFT tokens and implements NEAR standarts.
 ### Development
 
 1. Clone repository and switch directory
+
 ```bash
 git clone <repoUrl>
 cd vself-beta-contract
 ```
+
 1. Install dependencies
-    ```bash
-    yarn
-    ```
+   ```bash
+   yarn
+   ```
 1. Build contract
-    ```bash
-    yarn build
-    ```
+   ```bash
+   yarn build
+   ```
 1. Deploy contract to dev account
-    ```bash
-    yarn dev:deploy
-    ```
+   ```bash
+   yarn dev:deploy
+   ```
 1. Test contract deployed to dev account
-    ```bash
-    yarn test:contract
-    ```
+   ```bash
+   yarn test:contract
+   ```
 
 ### Contract Interface
 
@@ -69,13 +71,13 @@ Read-only Methods:
 Deployed to google cloud, has contract level account credentials for now.
 
 HTTPS Endpoints:
+
 1. /status -> Num (number of quests) / 0 - for no event
 1. /rewards?nearid=<blabla> -> [ string ] (url of NFT images)
 1. /balance?nearid=<account_id> -> {[Reward]}
-1. /checkin?nearid=<account_id>&qr=<string> -> 
-    OnSucces: -> Reward: { index, got, title, description }
-    OnFail  : -> Reward: { -1, false, "nothing", "nothing"}
-
+1. /checkin?nearid=<account_id>&qr=<string> ->
+   OnSucces: -> Reward: { index, got, title, description }
+   OnFail : -> Reward: { -1, false, "nothing", "nothing"}
 
 ## Future plans
 
@@ -85,4 +87,3 @@ HTTPS Endpoints:
 - Credentials Registry (upgrade NFT to VC by building client owned indexer)
 - Decentralized storage (via Filecoin -> Machina)
 - Cusdev and basic tokenomics
-

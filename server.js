@@ -16,13 +16,12 @@ const io = require("socket.io")(server, {
   origins: ["*"],
 });
 
-const nearConfig = getConfig(process.env.APP_ENV || 'development')
+const nearConfig = getConfig(process.env.APP_ENV || "development");
 const { nodeUrl, networkId, contractName } = nearConfig;
-const contractMethods = 
-{
-  changeMethods: [ 'checkin' ],
-  viewMethods: ['version', 'get_user_balance_extra', 'get_event_data'],
-}
+const contractMethods = {
+  changeMethods: ["checkin"],
+  viewMethods: ["version", "get_user_balance_extra", "get_event_data"],
+};
 
 const {
   keyStores: { InMemoryKeyStore },
@@ -36,15 +35,8 @@ const {
 } = nearAPI;
 
 // Load credentials
-console.log(
-  "Loading Credentials:\n",
-  `./creds/${contractName}.json`  
-);
-const credentials = JSON.parse(
-  fs.readFileSync(
-    `./creds/${contractName}.json`    
-  )
-);
+console.log("Loading Credentials:\n", `./creds/${contractName}.json`);
+const credentials = JSON.parse(fs.readFileSync(`./creds/${contractName}.json`));
 
 const keyStore = new InMemoryKeyStore();
 keyStore.setKey(
@@ -71,9 +63,9 @@ const contract = new Contract(contractAccount, contractName, contractMethods);
 
 // Logic API
 app.get("/version", async (req, res) => {
-  let result = await contract.version().catch( (err) => {  
+  let result = await contract.version().catch((err) => {
     res.status(500).send();
-  })
+  });
   res.json(result);
 });
 
@@ -81,52 +73,63 @@ app.get("/version", async (req, res) => {
 app.get("/status", async (req, res) => {
   let result;
   // Number of rewards (0 - for no event)
-  result = await contract.get_event_data().catch( (err) => {  
+  result = await contract.get_event_data().catch((err) => {
     res.json(0);
   });
   res.json(result.quests.length);
 });
 
 // Balance of a single player or list of NFT rewards
-app.get("/rewards", async (req, res) => {    
+app.get("/rewards", async (req, res) => {
   let result = [];
   let nearid = req.query.nearid;
-  
-  await contract.get_event_data().catch( (err) => {  
-    console.log(err);
-    res.status(200).send();
-  }).then( event_data => {
-    console.log("Event Data: ", event_data);
-    result = event_data.quests.map(quest => quest.reward_uri);
-  })   
+
+  await contract
+    .get_event_data()
+    .catch((err) => {
+      console.log(err);
+      res.status(200).send();
+    })
+    .then((event_data) => {
+      console.log("Event Data: ", event_data);
+      result = event_data.quests.map((quest) => quest.reward_uri);
+    });
 
   res.json(result);
 });
 
 // Balance of a single player or list of NFT rewards
-app.get("/balance", async (req, res) => {    
-  let result = 'None';
-  let nearid = req.query.nearid;  
+app.get("/balance", async (req, res) => {
+  let result = "None";
+  let nearid = req.query.nearid;
 
-  if (nearid) { // If username is provided we need to return user balance
+  if (nearid) {
+    // If username is provided we need to return user balance
     let account_id = nearid.slice(1, -1); // Extract account id
     console.log("Account ID: ", account_id);
-    await contract.get_user_balance_extra({ account_id }).catch( (err) => {  
-      console.log(err);
-      res.status(200).send();
-    }).then( balance_data => {
-      console.log("Balance: ", balance_data);
-      result = balance_data;
-    })
-  } else { // If it's a request and we need to return list of NFTs
-    await contract.get_event_data().catch( (err) => {  
-      console.log(err);
-      res.status(200).send();
-    }).then( event_data => {
-      console.log("Event Data: ", event_data);
-      result = event_data.quests.map(quest => quest.reward_uri);
-      console.log(result);
-    })    
+    await contract
+      .get_user_balance_extra({ account_id })
+      .catch((err) => {
+        console.log(err);
+        res.status(200).send();
+      })
+      .then((balance_data) => {
+        console.log("Balance: ", balance_data);
+        result = balance_data;
+      });
+  } else {
+    // If it's a request and we need to return list of NFTs
+    await contract
+      .get_event_data()
+      .catch((err) => {
+        console.log(err);
+        res.status(200).send();
+      })
+      .then((event_data) => {
+        console.log("Event Data: ", event_data);
+        result = event_data.quests.map((quest) => quest.reward_uri);
+        console.log(result);
+      });
   }
 
   res.json(result);
@@ -134,30 +137,35 @@ app.get("/balance", async (req, res) => {
 
 // Checkin
 app.get("/checkin", async (req, res) => {
-  let result = 'None';
+  let result = "None";
   const username = req.query.nearid.slice(1, -1);
   const request = req.query.qr.slice(1, -1);
   const gas_cost = 300000000000000;
-  const minting_cost = "100000000000000000000000";  
+  const minting_cost = "100000000000000000000000";
   console.log("Incoming action: {} {}", username, request);
-  
-  result = await contract.checkin({args: { username, request }, gas: gas_cost, amount: minting_cost })
-  .catch( (err) => {
-    console.log(err);
-    res.json({
-      index: -1,
-      got: false,
-      title: "nothing",
-      description: "nothing"
+
+  result = await contract
+    .checkin({
+      args: { username, request },
+      gas: gas_cost,
+      amount: minting_cost,
+    })
+    .catch((err) => {
+      console.log(err);
+      res.json({
+        index: -1,
+        got: false,
+        title: "nothing",
+        description: "nothing",
+      });
     });
-  })
   console.log(result);
   if (result === null) {
     res.json({
       index: -1,
       got: false,
       title: "nothing",
-      description: "nothing"
+      description: "nothing",
     });
   }
   res.json(result);
@@ -165,16 +173,18 @@ app.get("/checkin", async (req, res) => {
 
 // Check that account is valid (only for testnet)
 app.get("/check-account", async (req, res) => {
-  let result = 'None';
+  let result = "None";
   try {
     let nearid = req.query.nearid;
-    const response = await fetch('https://explorer.testnet.near.org/accounts/' + nearid);
+    const response = await fetch(
+      "https://explorer.testnet.near.org/accounts/" + nearid
+    );
     const resText = await response.text();
-    result = !resText.includes('check if the account name');
+    result = !resText.includes("check if the account name");
   } catch (err) {
     console.log(err);
     res.json({
-      err
+      err,
     });
     return;
   }

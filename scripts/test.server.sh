@@ -15,4 +15,3 @@ curl "http://localhost:8080/rewards?nearid='ilerik.testnet'" && echo ""
 
 # Check that account is valid
 curl "http://localhost:8080/check-account?nearid=ilerik.testnet" && echo ""
-
