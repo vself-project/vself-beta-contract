@@ -41,4 +41,4 @@ sh.exec(`near call ${CONTRACT_NAME} new --accountId ${CONTRACT_NAME}`);
 sh.exec(`near view ${CONTRACT_NAME} is_active`);
 
 // Set admin
-// sh.exec(`near call ${CONTRACT_NAME} approve_admin '{"admin_id": "${ADMIN_ACCOUNT}"}' --accountId ${CONTRACT_NAME} --gas 30000000000000`);
+sh.exec(`near call ${CONTRACT_NAME} approve_admin '{"admin_id": "${ADMIN_ACCOUNT}"}' --accountId ${CONTRACT_NAME} --gas 30000000000000`);

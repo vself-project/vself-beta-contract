@@ -63,6 +63,7 @@ app.get("/status", async (req, res) => {
 });
 
 // Balance of a single player or list of NFT rewards
+// TODO test it
 app.get("/rewards", async (req, res) => {
   let result = [];
   let nearid = req.query.nearid;
