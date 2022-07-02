@@ -15,7 +15,7 @@ RUN npm install --only=production
 
 # Copy local code to the container image.
 COPY . ./
-ENV CONTRACT_NAME beta_v10.sergantche.testnet
+ENV CONTRACT_NAME v32.prod.vself.sergantche.testnet
 
 # Run the web service on container startup.
 CMD [ "npm", "start" ]

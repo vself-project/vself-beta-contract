@@ -14,6 +14,8 @@ const server = http.createServer(app);
 
 const nearConfig = getConfig(process.env.APP_ENV || "development");
 const { nodeUrl, networkId, contractName } = nearConfig;
+console.log('Contract name: ', contractName);
+
 const contractMethods = {
   changeMethods: ["checkin"],
   viewMethods: ["version", "get_user_balance_extra", "get_event_data"],
@@ -31,7 +33,7 @@ const {
 } = nearAPI;
 
 // Load credentials
-const serverAccount = process.env.SERVER_ACCOUNT;
+const serverAccount = 'server.prod.vself.sergantche.testnet';
 const credentials = JSON.parse(String(fs.readFileSync(`./creds/${serverAccount}.json`)));
 
 // Create key store
@@ -124,16 +126,17 @@ app.get("/checkin", async (req, res) => {
   try {
     let result = "None";
     const username = req.query.nearid.slice(1, -1);
+    console.log("query: ", req.query);
     const request = req.query.qr.slice(1, -1);
 
     // Set appropriate gas cost and minting cost
     const gas_cost = 300000000000000;
-    const minting_cost = "8470000000000000000000";    // 0.00847 NEAR
+    const minting_cost = "10000000000000000000000";    // 0.00847 NEAR
     console.log("Incoming action: {} {}", username, request);
   
     result = await contract
       .checkin({
-        args: { username, request },
+        args: { username: String(username), request: String(request) },
         gas: gas_cost,
         amount: minting_cost,
       })
