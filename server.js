@@ -11,13 +11,11 @@ const getConfig = require("./config/near");
 const app = express();
 const port = process.env.PORT || 8080;
 const server = http.createServer(app);
-const io = require("socket.io")(server, {
-  cors: true,
-  origins: ["*"],
-});
 
 const nearConfig = getConfig(process.env.APP_ENV || "development");
 const { nodeUrl, networkId, contractName } = nearConfig;
+console.log('Contract name: ', contractName);
+
 const contractMethods = {
   changeMethods: ["checkin"],
   viewMethods: ["version", "get_user_balance_extra", "get_event_data"],
@@ -35,31 +33,17 @@ const {
 } = nearAPI;
 
 // Load credentials
-console.log("Loading Credentials:\n", `./creds/${contractName}.json`);
-const credentials = JSON.parse(fs.readFileSync(`./creds/${contractName}.json`));
+const serverAccount = 'server.prod.vself.sergantche.testnet';
+const credentials = JSON.parse(String(fs.readFileSync(`./creds/${serverAccount}.json`)));
 
+// Create key store
 const keyStore = new InMemoryKeyStore();
-keyStore.setKey(
-  networkId,
-  contractName,
-  KeyPair.fromString(credentials.private_key)
-);
-const near = new Near({
-  networkId,
-  nodeUrl,
-  deps: { keyStore },
-});
-const { connection } = near;
-const contractAccount = new Account(connection, contractName);
-contractAccount.addAccessKey = (publicKey) =>
-  contractAccount.addKey(
-    publicKey,
-    contractName,
-    contractMethods.changeMethods,
-    parseNearAmount("0.1")
-  );
+keyStore.setKey(networkId, serverAccount, KeyPair.fromString(credentials.private_key));
 
-const contract = new Contract(contractAccount, contractName, contractMethods);
+// Create account and contract object
+const { connection } = new Near({ networkId, nodeUrl, deps: { keyStore }, headers: {} });
+const account = new Account(connection, serverAccount);
+const contract = new Contract(account, contractName, contractMethods);
 
 // Logic API
 app.get("/version", async (req, res) => {
@@ -71,6 +55,7 @@ app.get("/version", async (req, res) => {
 
 // Get status of current event
 app.get("/status", async (req, res) => {
+  // TODO use try/catch block
   let result;
   // Number of rewards (0 - for no event)
   result = await contract.get_event_data().catch((err) => {
@@ -80,6 +65,7 @@ app.get("/status", async (req, res) => {
 });
 
 // Balance of a single player or list of NFT rewards
+// TODO test it
 app.get("/rewards", async (req, res) => {
   let result = [];
   let nearid = req.query.nearid;
@@ -137,38 +123,53 @@ app.get("/balance", async (req, res) => {
 
 // Checkin
 app.get("/checkin", async (req, res) => {
-  let result = "None";
-  const username = req.query.nearid.slice(1, -1);
-  const request = req.query.qr.slice(1, -1);
-  const gas_cost = 300000000000000;
-  const minting_cost = "100000000000000000000000";
-  console.log("Incoming action: {} {}", username, request);
+  try {
+    let result = "None";
+    const username = req.query.nearid.slice(1, -1);
+    console.log("query: ", req.query);
+    const request = req.query.qr.slice(1, -1);
 
-  result = await contract
-    .checkin({
-      args: { username, request },
-      gas: gas_cost,
-      amount: minting_cost,
-    })
-    .catch((err) => {
-      console.log(err);
+    // Set appropriate gas cost and minting cost
+    const gas_cost = 300000000000000;
+    const minting_cost = "10000000000000000000000";    // 0.00847 NEAR
+    console.log("Incoming action: {} {}", username, request);
+  
+    result = await contract
+      .checkin({
+        args: { username: String(username), request: String(request) },
+        gas: gas_cost,
+        amount: minting_cost,
+      })
+      .catch((err) => {
+        console.log(err);
+        res.json({
+          index: -1,
+          got: false,
+          title: "nothing",
+          description: "nothing",
+          errorMessage: String(err),
+        });
+      });
+    console.log(result);
+    if (result === null) {
       res.json({
         index: -1,
         got: false,
         title: "nothing",
         description: "nothing",
       });
-    });
-  console.log(result);
-  if (result === null) {
+    }
+    res.json(result);
+  } catch (err) {
     res.json({
       index: -1,
       got: false,
+      error: true,
       title: "nothing",
       description: "nothing",
+      errorMessage: String(err),
     });
   }
-  res.json(result);
 });
 
 // Check that account is valid (only for testnet)

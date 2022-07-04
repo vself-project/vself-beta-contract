@@ -181,7 +181,7 @@ impl Contract {
         self.admin_ids.remove(&admin_id);
     }
 
-    /// Initiate next event
+    /// Initiate next event (only for an admin)
     pub fn start_event(&mut self, event: EventData) {
         assert!( self.event.is_none() );
         assert!( self.is_admin(&env::predecessor_account_id()) );      
@@ -200,9 +200,10 @@ impl Contract {
         })
     }
 
-    /// Stop and put event to archive
+    /// Stop and put event to archive (only for an admin)
     pub fn stop_event(&mut self) {
         assert!( self.event.is_some() );
+        assert!( self.is_admin(&env::predecessor_account_id()) );
         let timestamp: u64 = env::block_timestamp();        
 
         let mut final_stats = self.stats.as_ref().unwrap().clone(); 
@@ -237,7 +238,7 @@ impl Contract {
                 if hashed_input_hex == quest.qr_prefix_enc { break };
             }         
             reward_index = reward_index + 1;            
-        }        
+        }
         
         let action_data = ActionData {
             username: username.clone(),
@@ -267,7 +268,7 @@ impl Contract {
         // Check if we've been awarded a reward
         if let Some(quest) = quests.get(reward_index) {  
             // Update state if we are lucky          
-            stats.total_rewards += 1;          
+            stats.total_rewards += 1;
             self.stats = Some(stats);
 
             // Update user balance
@@ -302,6 +303,6 @@ impl Contract {
             self.stats = Some(stats);       
             log!("No reward for this checkin! User: {}", username);
             return None;            
-        }                        
+        }
     }
 }

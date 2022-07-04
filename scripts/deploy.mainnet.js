@@ -33,7 +33,7 @@ if (DELETE_BEFORE_DEPLOY) {
   );
 
   // Copy credentials for later deploy
-  sh.exec(`cp ~/.near-credentials/testnet/${CONTRACT_NAME}.json ./creds`);
+  sh.exec(`cp ~/.near-credentials/mainnet/${CONTRACT_NAME}.json ./creds`);
 }
 
 // Deploy contract
