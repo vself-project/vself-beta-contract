@@ -35,8 +35,9 @@ impl Contract {
         let contract_id = env::current_account_id();
         let timestamp: u64 = env::block_timestamp();
 
-        let quest = self.event.as_ref().unwrap().quests.get(reward_index).unwrap();                                                                     
-        let token_id_with_timestamp: String = format!("{}:{}:{}", self.event_id.clone(), reward_index.clone(), timestamp);
+        let quest = self.event.as_ref().unwrap().quests.get(reward_index).unwrap();
+        let rand: u8 = *env::random_seed().get(0).unwrap();                                                                     
+        let token_id_with_timestamp: String = format!("{}:{}:{}:{}", self.event_id.clone(), reward_index.clone(), timestamp, rand);
         let media_url: String = format!("{}", quest.reward_uri);
         let media_hash = Base64VecU8(env::sha256(media_url.as_bytes()));
 

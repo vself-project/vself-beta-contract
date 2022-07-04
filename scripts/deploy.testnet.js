@@ -14,6 +14,7 @@ const CREATE_CONTRACT_ACCOUNT_BEFORE_DEPLOY = process.env.CREATE_CONTRACT_ACCOUN
 // Contract initial balance
 let initialBalance = Number(CONTRACT_DEPLOYMENT_COST) + Number(CONTRACT_STORAGE_COST) + Number(CONTRACT_CONSTRUCTOR_COST) + Number(CONTRACT_EXTRA);
 console.log('Contract initial balance: ', initialBalance);
+//initialBalance = 21.93564010098;
 
 // Recreate account
 if (DELETE_BEFORE_DEPLOY) {
@@ -37,8 +38,9 @@ if (DELETE_BEFORE_DEPLOY) {
 
 // Deploy contract
 sh.exec(`near deploy --wasmFile out/main.wasm --accountId ${CONTRACT_NAME}`);
+
+// Call constructor
 sh.exec(`near call ${CONTRACT_NAME} new --accountId ${CONTRACT_NAME}`);
-sh.exec(`near view ${CONTRACT_NAME} is_active`);
 
 // Set admin
 sh.exec(`near call ${CONTRACT_NAME} approve_admin '{"admin_id": "${ADMIN_ACCOUNT}"}' --accountId ${CONTRACT_NAME} --gas 30000000000000`);
